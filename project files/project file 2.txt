@@ -1,0 +1,14 @@
+df = pd.read_csv('Indian_Liver_Patient_Dataset.csv')
+df['Gender'] = LabelEncoder().fit_transform(df['Gender'])
+X = df.drop(columns=['Selector'])  # features
+y = df['Selector']                  # target (1 = disease, 0 = healthy)
+
+# Scale features
+X_scaled = StandardScaler().fit_transform(X)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, stratify=y, random_state=42)
+
+# Deal with imbalance using SMOTE
+X_train_sm, y_train_sm = SMOTE(random_state=42).fit_resample(X_train, y_train)
