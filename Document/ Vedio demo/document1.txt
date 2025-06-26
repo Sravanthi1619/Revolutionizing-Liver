@@ -1,0 +1,10 @@
+import pandas as pd
+res = pd.DataFrame({
+    'Model': ['GaussianNB'],
+    'Accuracy': [acc],
+    'Precision': [report['1']['precision']],
+    'Recall': [report['1']['recall']],
+    'F1-Score': [report['1']['f1-score']],
+    'ROC-AUC': [auc]
+})
+print(res.round(3))
