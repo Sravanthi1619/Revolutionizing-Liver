@@ -1,0 +1,35 @@
+def plot_conf_matrix(y_true, y_pred, model_name):
+    cm = confusion_matrix(y_true, y_pred)
+    plt.figure(figsize=(5,4))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
+                xticklabels=['No','Yes'], yticklabels=['No','Yes'])
+    plt.title(f'Confusion Matrix: {model_name}')
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.show()
+
+def plot_roc_pr(y_true, y_proba, precision, recall, model_name):
+    fpr, tpr, _ = roc_curve(y_true, y_proba)
+    auc = roc_auc_score(y_true, y_proba)
+    
+    # ROC
+    plt.figure(figsize=(12,5))
+    plt.subplot(1,2,1)
+    plt.plot(fpr, tpr, label=f'AUC = {auc:.2f}')
+    plt.plot([0,1],[0,1],'r--')
+    plt.title(f'ROC Curve: {model_name}')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend()
+    
+    # Precision-Recall
+    plt.subplot(1,2,2)
+    no_skill = sum(y_true==1)/len(y_true)
+    plt.plot([0,1],[no_skill,no_skill],'k--', label='No Skill')
+    plt.plot(recall, precision, label='Model')
+    plt.title(f'Precision-Recall: {model_name}')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.legend()
+    plt.show()
+
