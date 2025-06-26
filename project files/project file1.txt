@@ -1,0 +1,9 @@
+importances = models['RandomForest'].feature_importances_
+feat_names = X.columns
+feat_imp = pd.Series(importances, index=feat_names).sort_values(ascending=False)[:5]
+
+plt.figure(figsize=(7,5))
+sns.barplot(x=feat_imp.values, y=feat_imp.index, palette='viridis')
+plt.title('Top 5 Feature Importances (RandomForest)')
+plt.xlabel('Importance Score'); plt.ylabel('Feature')
+plt.show()
