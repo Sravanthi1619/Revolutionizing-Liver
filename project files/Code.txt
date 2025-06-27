@@ -1,0 +1,51 @@
+# Required libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from sklearn.metrics import classification_report, roc_auc_score
+from imblearn.over_sampling import SMOTE
+from tabpfn import TabPFNClassifier  # pip install tabpfn
+
+# 1. Load data
+df = pd.read_csv('Indian_Liver_Patient_Dataset.csv')  # ensure correct path
+df.rename(columns={'Selector':'Target'}, inplace=True)
+
+# 2. Encode & scale
+df['Gender'] = LabelEncoder().fit_transform(df['Gender'])
+X = df.drop(columns=['Target'])
+y = df['Target']
+X_scaled = StandardScaler().fit_transform(X)
+
+# 3. Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, stratify=y, random_state=42)
+
+# 4. SMOTE
+X_train_sm, y_train_sm = SMOTE(random_state=42).fit_resample(X_train, y_train)
+
+# 5. Models
+models = {
+    'LogisticRegression': LogisticRegression(max_iter=500),
+    'RandomForest': RandomForestClassifier(n_estimators=100, random_state=42),
+    'XGBoost': XGBClassifier(use_label_encoder=False, eval_metric='logloss'),
+    'TabPFN': TabPFNClassifier(device='cpu', seed=0)
+}
+
+# 6. Train + Evaluate
+results = []
+for name, m in models.items():
+    m.fit(X_train_sm, y_train_sm)
+    y_pred = m.predict(X_test)
+    y_prob = m.predict_proba(X_test)[:,1]
+    stats = classification_report(y_test, y_pred, output_dict=True)
+    auc = roc_auc_score(y_test, y_prob)
+    results.append((name, stats['accuracy'], stats['1']['precision'], stats['1']['recall'], stats['1']['f1-score'], auc))
+
+# 7. Results table
+import pandas as pd
+res_df = pd.DataFrame(results, columns=['Model','Accuracy','Precision','Recall','F1','ROC_AUC'])
+print(res_df.round(3))
+
